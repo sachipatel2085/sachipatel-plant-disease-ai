@@ -1,25 +1,49 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import tensorflow as tf
 import numpy as np
 from PIL import Image
 import io
 import json
+import os
 
 app = Flask(__name__)
+CORS(app)
 
 # Load model
-model = tf.keras.models.load_model("plant_model.h5", compile=False)
+model = tf.keras.models.load_model(
+    "plant_model.h5",
+    compile=False
+)
+
 # Load labels
 with open("labels.json") as f:
     labels = json.load(f)
 
+
+# Home route
+@app.route("/")
+def home():
+    return "Plant Disease AI API Running"
+
+
+# Prediction route
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
+        # Check image exists
+        if "image" not in request.files:
+            return jsonify({
+                "error": "No image uploaded"
+            }), 400
+
         file = request.files["image"]
 
-        # Convert image
-        img = Image.open(io.BytesIO(file.read())).convert("RGB")
+        # Read and process image
+        img = Image.open(
+            io.BytesIO(file.read())
+        ).convert("RGB")
+
         img = img.resize((224, 224))
 
         img_array = np.array(img) / 255.0
@@ -33,13 +57,16 @@ def predict():
 
         disease_name = labels[str(predicted_class)]
 
-        # 🔥 Top 3 predictions
+        # Top 3 predictions
         top_indices = prediction.argsort()[-3:][::-1]
 
         top_predictions = [
             {
                 "disease": labels[str(i)],
-                "confidence": round(float(prediction[i]) * 100, 2)
+                "confidence": round(
+                    float(prediction[i]) * 100,
+                    2
+                )
             }
             for i in top_indices
         ]
@@ -53,8 +80,17 @@ def predict():
 
     except Exception as e:
         print("ERROR:", str(e))
-        return jsonify({"error": str(e)}), 500
+
+        return jsonify({
+            "error": str(e)
+        }), 500
 
 
+# Run app
 if __name__ == "__main__":
-    app.run(port=5001, debug=True)
+    port = int(os.environ.get("PORT", 10000))
+
+    app.run(
+        host="0.0.0.0",
+        port=port
+    )
