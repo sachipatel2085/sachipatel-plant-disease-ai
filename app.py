@@ -8,8 +8,7 @@ import json
 app = Flask(__name__)
 
 # Load model
-model = tf.keras.models.load_model("plant_model.h5")
-
+model = tf.keras.models.load_model("plant_model.h5", compile=False)
 # Load labels
 with open("labels.json") as f:
     labels = json.load(f)
