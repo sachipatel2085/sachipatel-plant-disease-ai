@@ -9,4 +9,4 @@ model = tf.keras.models.load_model(
 # Save in new format
 model.save("new_plant_model.h5")
 
-print("Model converted successfully")
+print("Model converted successfully!")
