@@ -10,28 +10,37 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Load model
-model = tf.keras.models.load_model(
-    "plant_model.h5",
-    compile=False
-)
+# Global model variable
+model = None
 
 # Load labels
 with open("labels.json") as f:
     labels = json.load(f)
 
 
-# Home route
+def load_model():
+    global model
+
+    if model is None:
+        print("Loading model...")
+        model = tf.keras.models.load_model(
+            "plant_model.h5",
+            compile=False
+        )
+        print("Model loaded successfully")
+
+
 @app.route("/")
 def home():
     return "Plant Disease AI API Running"
 
 
-# Prediction route
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        # Check image exists
+        # Load model only when needed
+        load_model()
+
         if "image" not in request.files:
             return jsonify({
                 "error": "No image uploaded"
@@ -39,7 +48,6 @@ def predict():
 
         file = request.files["image"]
 
-        # Read and process image
         img = Image.open(
             io.BytesIO(file.read())
         ).convert("RGB")
@@ -49,7 +57,6 @@ def predict():
         img_array = np.array(img) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
 
-        # Predict
         prediction = model.predict(img_array)[0]
 
         predicted_class = int(np.argmax(prediction))
@@ -57,7 +64,6 @@ def predict():
 
         disease_name = labels[str(predicted_class)]
 
-        # Top 3 predictions
         top_indices = prediction.argsort()[-3:][::-1]
 
         top_predictions = [
@@ -86,7 +92,6 @@ def predict():
         }), 500
 
 
-# Run app
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
 
