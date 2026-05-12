@@ -3,12 +3,12 @@ import tensorflow as tf
 print("Loading old model...")
 
 model = tf.keras.models.load_model(
-    "old_model.h5",
+    "plant_model.h5",
     compile=False
 )
 
-print("Saving new model...")
+print("Saving converted model...")
 
-model.save("plant_model.h5")
+model.save("converted_model.h5")
 
 print("DONE")
