@@ -10,7 +10,7 @@ import os
 
 app = Flask(__name__)
 CORS(app)
-
+print("TensorFlow Version:", tf.__version__)
 print("Loading model...")
 
 # LOAD MODEL
