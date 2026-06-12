@@ -7,8 +7,16 @@ model = tf.keras.models.load_model(
     compile=False
 )
 
-print("Saving converted model...")
+print("Saving SavedModel format...")
 
-model.save("converted_model.h5")
+model.save("saved_model")
+
+print("Reloading SavedModel...")
+
+new_model = tf.keras.models.load_model("saved_model")
+
+print("Saving final H5...")
+
+new_model.save("fixed_plant_model.h5")
 
 print("DONE")
