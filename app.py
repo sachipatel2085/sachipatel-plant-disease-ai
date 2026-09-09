@@ -10,7 +10,7 @@ import os
 
 app = Flask(__name__)
 CORS(app)
-print("TensorFlow Version:", tf.__version__)
+print(os.path.getsize("plant_model.h5") / (1024*1024), "MB")
 print("Loading model...")
 
 # LOAD MODEL
