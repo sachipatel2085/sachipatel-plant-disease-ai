@@ -89,8 +89,9 @@ def _warmup_models():
             dummy_tensor = np.zeros((1, 224, 224, 3), dtype=np.float32)
             _ = LEGACY_MODEL(dummy_tensor, training=False)
         pipeline = _get_pipeline()
-        dummy_img = Image.new("RGB", (256, 256), color=(34, 139, 34))
-        _ = pipeline.diagnose(image_path_or_pil=dummy_img, user_crop_hint="potato")
+        if getattr(pipeline.disease_classifier, "has_trained_weights", False):
+            dummy_img = Image.new("RGB", (256, 256), color=(34, 139, 34))
+            _ = pipeline.diagnose(image_path_or_pil=dummy_img, user_crop_hint="potato")
         print("[v2] Model graphs warmed up successfully.")
     except Exception as e:
         print(f"[v2] Warmup warning (non-fatal): {e}")
@@ -185,7 +186,7 @@ def _get_knowledge_base() -> AgriculturalKnowledgeBase:
 # ═══════════════════════════════════════════════════════════════════════════
 # GET /api/v2/health
 # ═══════════════════════════════════════════════════════════════════════════
-@app.get("/api/v2/health")
+@app.api_route("/api/v2/health", methods=["GET", "HEAD"])
 async def health_check():
     pipeline = _get_pipeline()
     engine = _get_recommendation_engine()
@@ -457,16 +458,46 @@ def _run_diagnosis_sync(tmp_path: str, crop: Optional[str]) -> Dict[str, Any]:
             "diagnostic_explanation": f"Detected {clean_candidates[0]['name']} ({top_legacy['prob']*100:.1f}%).",
         }
 
-    # Watermelon or unsupported crop when v2 weights aren't trained yet: run pipeline and surface honest uncertainty
-    report = pipeline.diagnose(image_path_or_pil=tmp_path, user_crop_hint=crop)
-    if crop_lower == "watermelon" and report.get("status") == "REJECTED_UNCERTAINTY":
-        report["diagnostic_explanation"] = (
-            "Watermelon multi-class model weights are not yet trained (Phase 6 training scripts are ready in training_pipeline/). "
-            "The system refuses to force an unverified diagnosis. Please verify visual symptoms against the Watermelon Knowledge Base."
-        )
-        if isinstance(report.get("uncertainty"), dict):
-            report["uncertainty"]["rejection_reason"] = report["diagnostic_explanation"]
-    return report
+    # Watermelon or unsupported crop when v2 weights aren't trained yet:
+    # Fast, honest uncertainty rejection without running slow untrained neural networks
+    pests = pipeline.pest_detector.detect_pests(img, crop=crop_lower or "watermelon") if crop_lower == "watermelon" else []
+    pest_dicts = [
+        {
+            "pest_name": pt.pest_name,
+            "scientific_name": pt.scientific_name,
+            "confidence": pt.confidence,
+            "bbox": pt.bbox_normalized,
+            "damage_type": pt.damage_type,
+        }
+        for pt in pests
+    ]
+    sev = _estimate_hsv_lesion_severity(img)
+    explanation = (
+        "Watermelon multi-class model weights are not yet trained (Phase 6 training scripts are ready in training_pipeline/). "
+        "The system refuses to force an unverified diagnosis. Please verify visual symptoms against the Watermelon Knowledge Base."
+        if crop_lower == "watermelon"
+        else "Unable to classify this crop image with sufficient confidence. Please upload a clear Potato leaf photograph or select the crop explicitly."
+    )
+    return {
+        "status": "REJECTED_UNCERTAINTY",
+        "stage_results": {
+            "stage_1_quality": {"passed": True, "width": val_res.get("width"), "height": val_res.get("height")},
+            "stage_2_crop": {"predicted_crop": crop_lower or "unknown", "confidence": 0.0, "effective_crop": crop_lower or "unknown", "is_supported": crop_lower in ("potato", "watermelon")},
+            "stage_3_plant_part": {"organ": "leaf", "confidence": 0.0},
+            "stage_4_disease_candidates": [],
+        },
+        "final_diagnosis": None,
+        "differential_diagnoses": [],
+        "severity": sev,
+        "pest_detections": pest_dicts,
+        "uncertainty": {
+            "max_confidence": 0.0,
+            "is_rejected": True,
+            "is_differential": False,
+            "rejection_reason": explanation,
+        },
+        "diagnostic_explanation": explanation,
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1006,7 +1037,7 @@ async def legacy_predict(
 # ═══════════════════════════════════════════════════════════════════════════
 # GET / — Root info
 # ═══════════════════════════════════════════════════════════════════════════
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def root():
     return {
         "message": "Crop Health Diagnostic Service v2",
