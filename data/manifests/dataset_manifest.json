@@ -1,0 +1,195 @@
+{
+  "metadata": {
+    "generated_at": "2026-11-23T10:27:50.223491+00:00",
+    "pipeline_version": "2.0.0-phase2",
+    "total_valid_images": 4,
+    "total_rejected_images": 5,
+    "split_counts": {
+      "train": 4,
+      "val": 0,
+      "test": 0
+    },
+    "crop_counts": {
+      "watermelon": 2,
+      "potato": 2
+    },
+    "plant_part_counts": {
+      "fruit": 1,
+      "leaf": 2,
+      "tuber": 1
+    },
+    "source_attribution_counts": {
+      "plantvillage": 4
+    },
+    "total_conditions_represented": 4,
+    "class_weights_and_augmentation_policies": {
+      "watermelon__bacterial_fruit_blotch": {
+        "sample_count": 1,
+        "percentage": 25.0,
+        "inverse_frequency_weight": 1.0,
+        "effective_sample_weight": 1000.0,
+        "augmentation_policy": "STANDARD",
+        "recommended_augmentations": "RandomHorizontalFlip, RandomResizedCrop(scale=(0.8, 1.0))"
+      },
+      "potato__early_blight": {
+        "sample_count": 1,
+        "percentage": 25.0,
+        "inverse_frequency_weight": 1.0,
+        "effective_sample_weight": 1000.0,
+        "augmentation_policy": "STANDARD",
+        "recommended_augmentations": "RandomHorizontalFlip, RandomResizedCrop(scale=(0.8, 1.0))"
+      },
+      "potato__common_scab": {
+        "sample_count": 1,
+        "percentage": 25.0,
+        "inverse_frequency_weight": 1.0,
+        "effective_sample_weight": 1000.0,
+        "augmentation_policy": "STANDARD",
+        "recommended_augmentations": "RandomHorizontalFlip, RandomResizedCrop(scale=(0.8, 1.0))"
+      },
+      "watermelon__downy_mildew": {
+        "sample_count": 1,
+        "percentage": 25.0,
+        "inverse_frequency_weight": 1.0,
+        "effective_sample_weight": 1000.0,
+        "augmentation_policy": "STANDARD",
+        "recommended_augmentations": "RandomHorizontalFlip, RandomResizedCrop(scale=(0.8, 1.0))"
+      }
+    }
+  },
+  "rejected_samples_summary": [
+    {
+      "path": "D:\\c data\\Desktop\\farm-advisory-pletform\\plant-disease-ai\\data\\raw\\audit_fixture\\potato___early_blight\\blurry_image.jpg",
+      "reason": "Severe out-of-focus blur detected (Laplacian variance 0.00 < threshold 15.0)",
+      "details": {
+        "details": {
+          "reason": "Severe out-of-focus blur detected (Laplacian variance 0.00 < threshold 15.0)",
+          "path": "D:\\c data\\Desktop\\farm-advisory-pletform\\plant-disease-ai\\data\\raw\\audit_fixture\\potato___early_blight\\blurry_image.jpg",
+          "width": 256,
+          "height": 256,
+          "sharpness": 0.0
+        }
+      }
+    },
+    {
+      "path": "D:\\c data\\Desktop\\farm-advisory-pletform\\plant-disease-ai\\data\\raw\\audit_fixture\\potato___early_blight\\corrupted_file.jpg",
+      "reason": "File size too small (40 bytes < 1024 bytes)",
+      "details": {
+        "details": {
+          "reason": "File size too small (40 bytes < 1024 bytes)",
+          "path": "D:\\c data\\Desktop\\farm-advisory-pletform\\plant-disease-ai\\data\\raw\\audit_fixture\\potato___early_blight\\corrupted_file.jpg",
+          "file_size_bytes": 40
+        }
+      }
+    },
+    {
+      "path": "D:\\c data\\Desktop\\farm-advisory-pletform\\plant-disease-ai\\data\\raw\\audit_fixture\\potato___early_blight\\early_blight_dup.jpg",
+      "reason": "Duplicate detected (near_duplicate, distance=0) matching 'potato__early_blight_000004'",
+      "details": {
+        "matched_with": "potato__early_blight_000004",
+        "match_type": "near_duplicate",
+        "hamming_distance": 0
+      }
+    },
+    {
+      "path": "D:\\c data\\Desktop\\farm-advisory-pletform\\plant-disease-ai\\data\\raw\\audit_fixture\\random_unregistered_object\\mystery.jpg",
+      "reason": "Unknown or unmapped label 'random_unregistered_object'",
+      "details": {
+        "file_name": "mystery.jpg"
+      }
+    },
+    {
+      "path": "D:\\c data\\Desktop\\farm-advisory-pletform\\plant-disease-ai\\data\\raw\\audit_fixture\\watermelon_downy_mildew\\undersized_64x64.jpg",
+      "reason": "File size too small (692 bytes < 1024 bytes)",
+      "details": {
+        "details": {
+          "reason": "File size too small (692 bytes < 1024 bytes)",
+          "path": "D:\\c data\\Desktop\\farm-advisory-pletform\\plant-disease-ai\\data\\raw\\audit_fixture\\watermelon_downy_mildew\\undersized_64x64.jpg",
+          "file_size_bytes": 692
+        }
+      }
+    }
+  ],
+  "images": [
+    {
+      "image_id": "watermelon__bacterial_fruit_blotch_000001",
+      "split": "train",
+      "crop": "watermelon",
+      "condition_id": "watermelon__bacterial_fruit_blotch",
+      "condition_name": "Bacterial Fruit Blotch",
+      "scientific_name": "Acidovorax citrulli (syn. Acidovorax avenae subsp. citrulli)",
+      "category": "Bacterial Disease",
+      "primary_plant_part": "fruit",
+      "visual_detectability": "A",
+      "source_id": "plantvillage",
+      "source_license": "CC BY-SA 4.0",
+      "relative_path": "watermelon/watermelon__bacterial_fruit_blotch/watermelon__bacterial_fruit_blotch_000001.jpg",
+      "width": 256,
+      "height": 256,
+      "sharpness_laplacian_var": 189.1,
+      "file_size_bytes": 6267,
+      "sha256": "04a349e98ffdd226bae9d711f571a4c28e8aa8b52c7970a7b0b7bdc7b64f90f3",
+      "phash": "b076cbcb3c4c3332"
+    },
+    {
+      "image_id": "potato__early_blight_000004",
+      "split": "train",
+      "crop": "potato",
+      "condition_id": "potato__early_blight",
+      "condition_name": "Early Blight",
+      "scientific_name": "Alternaria solani",
+      "category": "Fungal Disease",
+      "primary_plant_part": "leaf",
+      "visual_detectability": "A",
+      "source_id": "plantvillage",
+      "source_license": "CC BY-SA 4.0",
+      "relative_path": "potato/potato__early_blight/potato__early_blight_000004.jpg",
+      "width": 256,
+      "height": 256,
+      "sharpness_laplacian_var": 144.91,
+      "file_size_bytes": 3563,
+      "sha256": "6c0f4db1020b910b0742b94618153361dd679b4516d49ea68805376b5d83e3ec",
+      "phash": "e6889923678e9e39"
+    },
+    {
+      "image_id": "potato__common_scab_000006",
+      "split": "train",
+      "crop": "potato",
+      "condition_id": "potato__common_scab",
+      "condition_name": "Common Scab",
+      "scientific_name": "Streptomyces scabies",
+      "category": "Bacterial Disease",
+      "primary_plant_part": "tuber",
+      "visual_detectability": "A",
+      "source_id": "plantvillage",
+      "source_license": "CC BY-SA 4.0",
+      "relative_path": "potato/potato__common_scab/potato__common_scab_000006.jpg",
+      "width": 256,
+      "height": 256,
+      "sharpness_laplacian_var": 224.37,
+      "file_size_bytes": 1964,
+      "sha256": "de5425739360a51c2c7c6f61f1045a69b3a30e3639b4e95615bf051e36bf795f",
+      "phash": "b92c8eb3c74c3938"
+    },
+    {
+      "image_id": "watermelon__downy_mildew_000008",
+      "split": "train",
+      "crop": "watermelon",
+      "condition_id": "watermelon__downy_mildew",
+      "condition_name": "Downy Mildew",
+      "scientific_name": "Pseudoperonospora cubensis",
+      "category": "Oomycete Disease",
+      "primary_plant_part": "leaf",
+      "visual_detectability": "A",
+      "source_id": "plantvillage",
+      "source_license": "CC BY-SA 4.0",
+      "relative_path": "watermelon/watermelon__downy_mildew/watermelon__downy_mildew_000008.jpg",
+      "width": 300,
+      "height": 300,
+      "sharpness_laplacian_var": 183.58,
+      "file_size_bytes": 4082,
+      "sha256": "26ad18cf2e7ab35dcf703333d70e869d633d60b948a2931c42be1be8d2a18e9a",
+      "phash": "c3c3643c3c99d3e2"
+    }
+  ]
+}
