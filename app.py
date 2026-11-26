@@ -204,6 +204,24 @@ async def health_check():
     }
 
 
+def _filter_top_candidates(
+    candidates: List[Dict[str, Any]],
+    confidence_key: str = "confidence",
+    min_confidence_pct: float = 50.0,
+    fallback_top_n: int = 2,
+) -> List[Dict[str, Any]]:
+    """Keep only results above 50% confidence; if none exceed 50%, keep only top 2."""
+    if not candidates:
+        return []
+    sorted_cands = sorted(
+        candidates,
+        key=lambda c: float(c.get(confidence_key, 0.0) or 0.0),
+        reverse=True,
+    )
+    high_conf = [c for c in sorted_cands if float(c.get(confidence_key, 0.0) or 0.0) > min_confidence_pct]
+    return high_conf[:fallback_top_n] if high_conf else sorted_cands[:fallback_top_n]
+
+
 def _extract_products_from_advisory(adv: Optional[Dict[str, Any]]) -> tuple:
     """Extract formatted product cards and text lines from a Phase 4 advisory dict."""
     products: List[Dict[str, Any]] = []
@@ -754,6 +772,8 @@ async def diagnose(
                 "solution": f"Cause:\n{cand_cause}\n\nTreatment:\n{cand_chem}\n\nOrganic Solution:\n{cand_organic}\n\nPrevention:\n{cand_prevention}",
             })
 
+        probable_diseases = _filter_top_candidates(probable_diseases, confidence_key="confidence", min_confidence_pct=50.0, fallback_top_n=2)
+
         # Build the solution text (formatted just like diseaseController.js does)
         solution_text = ""
         if cause_text.strip():
@@ -941,8 +961,9 @@ def _legacy_predict_sync(contents: bytes, tmp_path: str, crop: Optional[str]) ->
                     "disease": c.get("name") or c.get("condition_name", "Unknown"),
                     "confidence": round(float(c.get("calibrated_prob") or c.get("confidence") or 0.0) * 100, 2),
                 }
-                for c in candidates[:4]
+                for c in candidates
             ]
+            top_preds = _filter_top_candidates(top_preds, confidence_key="confidence", min_confidence_pct=50.0, fallback_top_n=2)
             return {
                 "success": True,
                 "class": 0,
@@ -968,8 +989,9 @@ def _legacy_predict_sync(contents: bytes, tmp_path: str, crop: Optional[str]) ->
         confidence = round(top["prob"] * 100, 2)
         top_preds = [
             {"disease": p["label"], "confidence": round(p["prob"] * 100, 2)}
-            for p in legacy_preds[:4]
+            for p in legacy_preds
         ]
+        top_preds = _filter_top_candidates(top_preds, confidence_key="confidence", min_confidence_pct=50.0, fallback_top_n=2)
         return {
             "success": True,
             "class": top["index"],
